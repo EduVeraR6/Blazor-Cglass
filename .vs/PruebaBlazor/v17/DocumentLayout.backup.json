@@ -1,0 +1,164 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\evera\\Desktop\\Pruebas\\BLAZOR\\PruebaBlazor\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{C794571B-AE63-4ED1-A6EB-0ABDD968D230}|PruebaBlazor.csproj|c:\\users\\evera\\desktop\\pruebas\\blazor\\pruebablazor\\pages\\clientparamvigencia.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{C794571B-AE63-4ED1-A6EB-0ABDD968D230}|PruebaBlazor.csproj|solutionrelative:pages\\clientparamvigencia.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C794571B-AE63-4ED1-A6EB-0ABDD968D230}|PruebaBlazor.csproj|c:\\users\\evera\\desktop\\pruebas\\blazor\\pruebablazor\\utils\\paginacion\\page.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C794571B-AE63-4ED1-A6EB-0ABDD968D230}|PruebaBlazor.csproj|solutionrelative:utils\\paginacion\\page.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C794571B-AE63-4ED1-A6EB-0ABDD968D230}|PruebaBlazor.csproj|c:\\users\\evera\\desktop\\pruebas\\blazor\\pruebablazor\\models\\cli\\cliclientparamvigencias\\cliclientesparamvigenciaspk.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C794571B-AE63-4ED1-A6EB-0ABDD968D230}|PruebaBlazor.csproj|solutionrelative:models\\cli\\cliclientparamvigencias\\cliclientesparamvigenciaspk.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C794571B-AE63-4ED1-A6EB-0ABDD968D230}|PruebaBlazor.csproj|c:\\users\\evera\\desktop\\pruebas\\blazor\\pruebablazor\\models\\cli\\cliclientparamvigencias\\cliclientesparamvigenciassavedao.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C794571B-AE63-4ED1-A6EB-0ABDD968D230}|PruebaBlazor.csproj|solutionrelative:models\\cli\\cliclientparamvigencias\\cliclientesparamvigenciassavedao.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C794571B-AE63-4ED1-A6EB-0ABDD968D230}|PruebaBlazor.csproj|c:\\users\\evera\\desktop\\pruebas\\blazor\\pruebablazor\\models\\cli\\cliclient\\cliclientesavedao.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C794571B-AE63-4ED1-A6EB-0ABDD968D230}|PruebaBlazor.csproj|solutionrelative:models\\cli\\cliclient\\cliclientesavedao.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C794571B-AE63-4ED1-A6EB-0ABDD968D230}|PruebaBlazor.csproj|c:\\users\\evera\\desktop\\pruebas\\blazor\\pruebablazor\\utils\\paginacion\\sort.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C794571B-AE63-4ED1-A6EB-0ABDD968D230}|PruebaBlazor.csproj|solutionrelative:utils\\paginacion\\sort.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C794571B-AE63-4ED1-A6EB-0ABDD968D230}|PruebaBlazor.csproj|c:\\users\\evera\\desktop\\pruebas\\blazor\\pruebablazor\\utils\\paginacion\\paginator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C794571B-AE63-4ED1-A6EB-0ABDD968D230}|PruebaBlazor.csproj|solutionrelative:utils\\paginacion\\paginator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C794571B-AE63-4ED1-A6EB-0ABDD968D230}|PruebaBlazor.csproj|c:\\users\\evera\\desktop\\pruebas\\blazor\\pruebablazor\\utils\\paginacion\\pageable.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C794571B-AE63-4ED1-A6EB-0ABDD968D230}|PruebaBlazor.csproj|solutionrelative:utils\\paginacion\\pageable.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 4,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "CliClientesParamVigenciasSaveDAO.cs",
+              "DocumentMoniker": "C:\\Users\\evera\\Desktop\\Pruebas\\BLAZOR\\PruebaBlazor\\Models\\CLI\\CliClientParamVigencias\\CliClientesParamVigenciasSaveDAO.cs",
+              "RelativeDocumentMoniker": "Models\\CLI\\CliClientParamVigencias\\CliClientesParamVigenciasSaveDAO.cs",
+              "ToolTip": "C:\\Users\\evera\\Desktop\\Pruebas\\BLAZOR\\PruebaBlazor\\Models\\CLI\\CliClientParamVigencias\\CliClientesParamVigenciasSaveDAO.cs",
+              "RelativeToolTip": "Models\\CLI\\CliClientParamVigencias\\CliClientesParamVigenciasSaveDAO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAAnAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-21T21:38:37.486Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "CliClienteSaveDAO.cs",
+              "DocumentMoniker": "C:\\Users\\evera\\Desktop\\Pruebas\\BLAZOR\\PruebaBlazor\\Models\\CLI\\CliClient\\CliClienteSaveDAO.cs",
+              "RelativeDocumentMoniker": "Models\\CLI\\CliClient\\CliClienteSaveDAO.cs",
+              "ToolTip": "C:\\Users\\evera\\Desktop\\Pruebas\\BLAZOR\\PruebaBlazor\\Models\\CLI\\CliClient\\CliClienteSaveDAO.cs",
+              "RelativeToolTip": "Models\\CLI\\CliClient\\CliClienteSaveDAO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-21T21:38:34.891Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ClientParamVigencia.razor",
+              "DocumentMoniker": "C:\\Users\\evera\\Desktop\\Pruebas\\BLAZOR\\PruebaBlazor\\Pages\\ClientParamVigencia.razor",
+              "RelativeDocumentMoniker": "Pages\\ClientParamVigencia.razor",
+              "ToolTip": "C:\\Users\\evera\\Desktop\\Pruebas\\BLAZOR\\PruebaBlazor\\Pages\\ClientParamVigencia.razor",
+              "RelativeToolTip": "Pages\\ClientParamVigencia.razor",
+              "ViewState": "AgIAAPUAAAAAAAAAAAAgwPcAAABKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-04-21T21:28:18.246Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Sort.cs",
+              "DocumentMoniker": "C:\\Users\\evera\\Desktop\\Pruebas\\BLAZOR\\PruebaBlazor\\Utils\\Paginacion\\Sort.cs",
+              "RelativeDocumentMoniker": "Utils\\Paginacion\\Sort.cs",
+              "ToolTip": "C:\\Users\\evera\\Desktop\\Pruebas\\BLAZOR\\PruebaBlazor\\Utils\\Paginacion\\Sort.cs",
+              "RelativeToolTip": "Utils\\Paginacion\\Sort.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-21T21:28:11.493Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Paginator.cs",
+              "DocumentMoniker": "C:\\Users\\evera\\Desktop\\Pruebas\\BLAZOR\\PruebaBlazor\\Utils\\Paginacion\\Paginator.cs",
+              "RelativeDocumentMoniker": "Utils\\Paginacion\\Paginator.cs",
+              "ToolTip": "C:\\Users\\evera\\Desktop\\Pruebas\\BLAZOR\\PruebaBlazor\\Utils\\Paginacion\\Paginator.cs",
+              "RelativeToolTip": "Utils\\Paginacion\\Paginator.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-21T21:28:10.787Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Pageable.cs",
+              "DocumentMoniker": "C:\\Users\\evera\\Desktop\\Pruebas\\BLAZOR\\PruebaBlazor\\Utils\\Paginacion\\Pageable.cs",
+              "RelativeDocumentMoniker": "Utils\\Paginacion\\Pageable.cs",
+              "ToolTip": "C:\\Users\\evera\\Desktop\\Pruebas\\BLAZOR\\PruebaBlazor\\Utils\\Paginacion\\Pageable.cs",
+              "RelativeToolTip": "Utils\\Paginacion\\Pageable.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-21T21:28:09.964Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Page.cs",
+              "DocumentMoniker": "C:\\Users\\evera\\Desktop\\Pruebas\\BLAZOR\\PruebaBlazor\\Utils\\Paginacion\\Page.cs",
+              "RelativeDocumentMoniker": "Utils\\Paginacion\\Page.cs",
+              "ToolTip": "C:\\Users\\evera\\Desktop\\Pruebas\\BLAZOR\\PruebaBlazor\\Utils\\Paginacion\\Page.cs",
+              "RelativeToolTip": "Utils\\Paginacion\\Page.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-21T21:28:01.472Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "CliClientesParamVigenciasPK.cs",
+              "DocumentMoniker": "C:\\Users\\evera\\Desktop\\Pruebas\\BLAZOR\\PruebaBlazor\\Models\\CLI\\CliClientParamVigencias\\CliClientesParamVigenciasPK.cs",
+              "RelativeDocumentMoniker": "Models\\CLI\\CliClientParamVigencias\\CliClientesParamVigenciasPK.cs",
+              "ToolTip": "C:\\Users\\evera\\Desktop\\Pruebas\\BLAZOR\\PruebaBlazor\\Models\\CLI\\CliClientParamVigencias\\CliClientesParamVigenciasPK.cs",
+              "RelativeToolTip": "Models\\CLI\\CliClientParamVigencias\\CliClientesParamVigenciasPK.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-21T21:38:56.88Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
