@@ -1,0 +1,115 @@
+﻿<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        @if (ShowTitle)
+        {
+            <h3>@Title</h3>
+        }
+    </div>
+
+    <div class="d-flex align-items-center">
+        @if (ShowAddButton)
+        {
+            <button class="btn btn-primary me-2" @onclick="OnAddClick">
+                <i class="bi bi-plus-circle-fill"></i>
+                @if (!string.IsNullOrEmpty(AddButtonText))
+                {
+                    <span class="ms-1">@AddButtonText</span>
+                }
+            </button>
+        }
+
+        @if (ShowCustomButtons && CustomButtons != null)
+        {
+            @CustomButtons
+        }
+
+        @if (ShowSearch)
+        {
+            <div class="input-group" style="width: @SearchWidth">
+                <input type="text"
+                       class="form-control"
+                       placeholder="@SearchPlaceholder"
+                       @bind="searchText"
+                       @bind:event="oninput"
+                       @onkeyup="HandleSearchKeyUp" />
+
+                @if (ShowSearchButton)
+                {
+                    <button class="btn btn-outline-secondary" @onclick="ExecuteSearch">
+                        <i class="bi bi-search"></i>
+                    </button>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string Title { get; set; } = "";
+
+    [Parameter]
+    public bool ShowTitle { get; set; } = true;
+
+    [Parameter]
+    public bool ShowAddButton { get; set; } = true;
+
+    [Parameter]
+    public string AddButtonText { get; set; } = "";
+
+    [Parameter]
+    public bool ShowSearch { get; set; } = true;
+
+    [Parameter]
+    public bool ShowSearchButton { get; set; } = true;
+
+    [Parameter]
+    public string SearchPlaceholder { get; set; } = "Buscar...";
+
+    [Parameter]
+    public string SearchWidth { get; set; } = "250px";
+
+    [Parameter]
+    public bool ShowCustomButtons { get; set; } = false;
+
+    [Parameter]
+    public RenderFragment CustomButtons { get; set; }
+
+    [Parameter]
+    public EventCallback OnAddClick { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnSearch { get; set; }
+
+    [Parameter]
+    public int SearchDebounceTime { get; set; } = 300;
+
+    private string searchText = "";
+    private System.Threading.Timer searchTimer;
+
+    private void HandleSearchKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            ExecuteSearch();
+        }
+        else if (SearchDebounceTime > 0)
+        {
+            searchTimer?.Dispose();
+            searchTimer = new System.Threading.Timer(_ =>
+            {
+                InvokeAsync(ExecuteSearch);
+            }, null, SearchDebounceTime, System.Threading.Timeout.Infinite);
+        }
+    }
+
+    private async Task ExecuteSearch()
+    {
+        await OnSearch.InvokeAsync(searchText);
+    }
+
+    public void Dispose()
+    {
+        searchTimer?.Dispose();
+    }
+}

@@ -1,0 +1,445 @@
+﻿@typeparam TItem
+@typeparam TKey
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                @if (AllowMultiSelect)
+                {
+                    <th style="width: 40px;">
+                        <input type="checkbox"
+                               class="form-check-input"
+                               @onchange="SelectAllItems" />
+                    </th>
+                }
+                @if (ShowActions)
+                {
+                    <th style="width: 120px;">
+                        @if (AllowMultiSelect && SelectedItems.Any())
+                        {
+                            <button class="btn btn-danger btn-sm" @onclick="BulkDeleteItems">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        }
+                        else
+                        {
+                            <span>Acciones</span>
+                        }
+                    </th>
+                }
+                @foreach (var column in Columns)
+                {
+                    <th style="@column.Width">@column.Title</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @if (IsLoading)
+            {
+                <tr>
+                    <td colspan="@GetTotalColumns()" class="text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                    </td>
+                </tr>
+            }
+            else if (Items == null || !Items.Any())
+            {
+                <tr>
+                    <td colspan="@GetTotalColumns()" class="text-center">
+                        No hay registros disponibles
+                    </td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var item in Items)
+                {
+                    <tr>
+                        @if (AllowMultiSelect)
+                        {
+                            <td>
+                                <input type="checkbox"
+                                       class="form-check-input"
+                                       checked="@IsItemSelected(item)"
+                                       @onchange="e => SelectItem(item, e.Value)" />
+                            </td>
+                        }
+
+                        @if (ShowActions)
+                        {
+                            <td>
+                                @if (IsEditing(item))
+                                {
+                                    <div class="btn-group">
+                                        <button class="btn btn-success btn-sm" @onclick="() => SaveItem(item)">
+                                            <i class="bi bi-check-lg"></i>
+                                        </button>
+                                        <button class="btn btn-danger btn-sm" @onclick="() => CancelEdit(item)">
+                                            <i class="bi bi-x"></i>
+                                        </button>
+                                    </div>
+                                }
+                                else if (IsNewItem(item))
+                                {
+                                    <div class="btn-group">
+                                        <button class="btn btn-success btn-sm" @onclick="() => SaveItem(item)">
+                                            <i class="bi bi-check-lg"></i>
+                                        </button>
+                                        <button class="btn btn-danger btn-sm" @onclick="() => RemoveNewItem(item)">
+                                            <i class="bi bi-x"></i>
+                                        </button>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="btn-group">
+                                        <button class="btn btn-warning btn-sm" @onclick="() => EditItem(item)">
+                                            <i class="bi bi-pen"></i>
+                                        </button>
+                                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteItem(item)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                }
+                            </td>
+                        }
+
+                        @foreach (var column in Columns)
+                        {
+                            <td>
+                                @if (IsEditing(item) || IsNewItem(item))
+                                {
+                                    @if (column.EditTemplate != null)
+                                    {
+                                        @column.EditTemplate(item)
+                                    }
+                                    else
+                                    {
+                                        @RenderDefaultEditor(column, item)
+                                    }
+                                }
+                                else
+                                {
+                                    @if (column.DisplayTemplate != null)
+                                    {
+                                        @column.DisplayTemplate(item)
+                                    }
+                                    else
+                                    {
+                                        @column.GetValue(item)
+                                    }
+                                }
+                            </td>
+                        }
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    [Parameter]
+    public List<TItem> Items { get; set; } = new List<TItem>();
+
+    [Parameter]
+    public List<TableColumn<TItem>> Columns { get; set; } = new List<TableColumn<TItem>>();
+
+    [Parameter]
+    public bool ShowActions { get; set; } = true;
+
+    [Parameter]
+    public bool AllowMultiSelect { get; set; } = true;
+
+    [Parameter]
+    public bool IsLoading { get; set; } = false;
+
+    [Parameter]
+    public Func<TItem, TKey> KeySelector { get; set; }
+
+    [Parameter]
+    public Func<TItem, bool> IsNewItemFunc { get; set; } = _ => false;
+
+    [Parameter]
+    public EventCallback<TItem> OnEdit { get; set; }
+
+    [Parameter]
+    public EventCallback<TItem> OnSave { get; set; }
+
+    [Parameter]
+    public EventCallback<TItem> OnDelete { get; set; }
+
+    [Parameter]
+    public EventCallback<List<TItem>> OnBulkDelete { get; set; }
+
+    [Parameter]
+    public EventCallback<TItem> OnCancelEdit { get; set; }
+
+    private HashSet<TKey> editingItemKeys = new HashSet<TKey>();
+    private HashSet<TKey> selectedItemKeys = new HashSet<TKey>();
+
+    private bool IsEditing(TItem item)
+    {
+        return KeySelector != null && editingItemKeys.Contains(KeySelector(item));
+    }
+
+    private bool IsNewItem(TItem item)
+    {
+        return IsNewItemFunc(item);
+    }
+
+    private bool IsItemSelected(TItem item)
+    {
+        return KeySelector != null && selectedItemKeys.Contains(KeySelector(item));
+    }
+
+    // Método que renderiza el editor adecuado según el tipo de dato
+    private RenderFragment RenderDefaultEditor(TableColumn<TItem> column, TItem item)
+    {
+        return builder =>
+        {
+            var currentValue = column.GetValue(item);
+            var type = column.EditorType;
+
+            if (type == EditorType.None)
+            {
+                // Intenta determinar el tipo automáticamente
+                if (currentValue != null)
+                {
+                    var valueType = currentValue.GetType();
+                    if (valueType == typeof(DateTime) || valueType == typeof(DateTime?))
+                        type = EditorType.Date;
+                    else if (valueType == typeof(bool) || valueType == typeof(bool?))
+                        type = EditorType.CheckBox;
+                    else if (valueType == typeof(int) || valueType == typeof(long) ||
+                             valueType == typeof(decimal) || valueType == typeof(double) ||
+                             valueType == typeof(float) || valueType == typeof(short))
+                        type = EditorType.Number;
+                    else
+                        type = EditorType.Text;
+                }
+                else
+                {
+                    type = EditorType.Text; // Por defecto
+                }
+            }
+
+            // Renderizar el control adecuado según el tipo
+            switch (type)
+            {
+                case EditorType.Text:
+                    builder.OpenElement(0, "input");
+                    builder.AddAttribute(1, "type", "text");
+                    builder.AddAttribute(2, "class", "form-control");
+                    builder.AddAttribute(3, "value", currentValue?.ToString() ?? "");
+                    builder.AddAttribute(4, "onchange", EventCallback.Factory.CreateBinder<string>(
+                        this, value => column.SetValue(item, value), currentValue?.ToString() ?? ""));
+                    builder.CloseElement();
+                    break;
+
+                case EditorType.Number:
+                    builder.OpenElement(0, "input");
+                    builder.AddAttribute(1, "type", "number");
+                    builder.AddAttribute(2, "class", "form-control");
+                    builder.AddAttribute(3, "value", currentValue?.ToString() ?? "");
+                    builder.AddAttribute(4, "step", column.NumericStep);
+                    builder.AddAttribute(5, "onchange", EventCallback.Factory.CreateBinder<string>(
+                        this, value => column.SetValue(item, value), currentValue?.ToString() ?? ""));
+                    builder.CloseElement();
+                    break;
+
+                case EditorType.Date:
+                    builder.OpenElement(0, "input");
+                    builder.AddAttribute(1, "type", "date");
+                    builder.AddAttribute(2, "class", "form-control");
+
+                    // Formatear la fecha adecuadamente para el control date
+                    string dateValue = "";
+                    if (currentValue is DateTime dateTime)
+                        dateValue = dateTime.ToString("yyyy-MM-dd");
+                    else if (currentValue != null)
+                        dateValue = currentValue.ToString();
+
+                    builder.AddAttribute(3, "value", dateValue);
+                    builder.AddAttribute(4, "onchange", EventCallback.Factory.CreateBinder<string>(
+                        this, value =>
+                        {
+                            if (DateTime.TryParse(value, out DateTime date))
+                                column.SetValue(item, date);
+                        }, dateValue));
+                    builder.CloseElement();
+                    break;
+
+                case EditorType.DateTime:
+                    builder.OpenElement(0, "input");
+                    builder.AddAttribute(1, "type", "datetime-local");
+                    builder.AddAttribute(2, "class", "form-control");
+
+                    // Formatear la fecha y hora adecuadamente
+                    string dateTimeValue = "";
+                    if (currentValue is DateTime dt)
+                        dateTimeValue = dt.ToString("yyyy-MM-ddTHH:mm");
+                    else if (currentValue != null)
+                        dateTimeValue = currentValue.ToString();
+
+                    builder.AddAttribute(3, "value", dateTimeValue);
+                    builder.AddAttribute(4, "onchange", EventCallback.Factory.CreateBinder<string>(
+                        this, value =>
+                        {
+                            if (DateTime.TryParse(value, out DateTime date))
+                                column.SetValue(item, date);
+                        }, dateTimeValue));
+                    builder.CloseElement();
+                    break;
+
+                case EditorType.CheckBox:
+                    builder.OpenElement(0, "div");
+                    builder.AddAttribute(1, "class", "form-check");
+                    builder.OpenElement(2, "input");
+                    builder.AddAttribute(3, "type", "checkbox");
+                    builder.AddAttribute(4, "class", "form-check-input");
+
+                    bool isChecked = false;
+                    if (currentValue is bool boolValue)
+                        isChecked = boolValue;
+                    else if (currentValue is string strValue)
+                        isChecked = strValue == "A" || strValue == "S" || strValue == "true" || strValue == "1";
+
+                    builder.AddAttribute(5, "checked", isChecked);
+                    builder.AddAttribute(6, "onchange", EventCallback.Factory.CreateBinder<bool>(
+                        this, value =>
+                        {
+                            if (currentValue is string && (currentValue.ToString() == "A" || currentValue.ToString() == "I"))
+                                column.SetValue(item, value ? "A" : "I");
+                            else if (currentValue is string && (currentValue.ToString() == "S" || currentValue.ToString() == "N"))
+                                column.SetValue(item, value ? "S" : "N");
+                            else
+                                column.SetValue(item, value);
+                        }, isChecked));
+                    builder.CloseElement();
+                    builder.CloseElement();
+                    break;
+
+                case EditorType.TextArea:
+                    builder.OpenElement(0, "textarea");
+                    builder.AddAttribute(1, "class", "form-control");
+                    builder.AddAttribute(2, "rows", column.TextAreaRows.ToString());
+                    builder.AddAttribute(3, "value", currentValue?.ToString() ?? "");
+                    builder.AddAttribute(4, "onchange", EventCallback.Factory.CreateBinder<string>(
+                        this, value => column.SetValue(item, value), currentValue?.ToString() ?? ""));
+                    builder.CloseElement();
+                    break;
+            }
+        };
+    }
+
+    private void SelectItem(TItem item, object isSelected)
+    {
+        if (KeySelector == null) return;
+
+        var key = KeySelector(item);
+        if ((bool)isSelected)
+            selectedItemKeys.Add(key);
+        else
+            selectedItemKeys.Remove(key);
+    }
+
+    private void SelectAllItems(ChangeEventArgs e)
+    {
+        if (KeySelector == null || Items == null) return;
+
+        bool isSelected = (bool)e.Value;
+        selectedItemKeys.Clear();
+
+        if (isSelected)
+        {
+            foreach (var item in Items)
+            {
+                selectedItemKeys.Add(KeySelector(item));
+            }
+        }
+    }
+
+    private async Task EditItem(TItem item)
+    {
+        if (KeySelector == null) return;
+
+        editingItemKeys.Add(KeySelector(item));
+        await OnEdit.InvokeAsync(item);
+    }
+
+    private async Task SaveItem(TItem item)
+    {
+        if (KeySelector != null)
+            editingItemKeys.Remove(KeySelector(item));
+
+        await OnSave.InvokeAsync(item);
+    }
+
+    private async Task DeleteItem(TItem item)
+    {
+        await OnDelete.InvokeAsync(item);
+    }
+
+    private async Task BulkDeleteItems()
+    {
+        if (KeySelector == null || Items == null) return;
+
+        var itemsToDelete = Items.Where(item => selectedItemKeys.Contains(KeySelector(item))).ToList();
+        await OnBulkDelete.InvokeAsync(itemsToDelete);
+        selectedItemKeys.Clear();
+    }
+
+    private async Task CancelEdit(TItem item)
+    {
+        if (KeySelector != null)
+            editingItemKeys.Remove(KeySelector(item));
+
+        await OnCancelEdit.InvokeAsync(item);
+    }
+
+    private async Task RemoveNewItem(TItem item)
+    {
+        await OnCancelEdit.InvokeAsync(item);
+    }
+
+    private int GetTotalColumns()
+    {
+        int count = Columns.Count;
+        if (ShowActions) count++;
+        if (AllowMultiSelect) count++;
+        return count;
+    }
+
+    public List<TItem> SelectedItems => Items?.Where(item => selectedItemKeys.Contains(KeySelector(item))).ToList() ?? new List<TItem>();
+
+    // Tipos de editores disponibles
+    public enum EditorType
+    {
+        None,       // Automático basado en el tipo
+        Text,       // Texto simple
+        Number,     // Número
+        Date,       // Fecha
+        DateTime,   // Fecha y hora
+        CheckBox,   // Checkbox (booleano o A/I o S/N)
+        TextArea    // Área de texto multilínea
+    }
+
+    public class TableColumn<T>
+    {
+        public string Title { get; set; }
+        public string Width { get; set; } = "";
+        public Func<T, object> GetValue { get; set; } = _ => "";
+        public Action<T, object> SetValue { get; set; } = (_, __) => { };
+        public RenderFragment<T> DisplayTemplate { get; set; }
+        public RenderFragment<T> EditTemplate { get; set; }
+
+        // Propiedades adicionales para controlar el tipo de editor
+        public EditorType EditorType { get; set; } = EditorType.None;
+        public string NumericStep { get; set; } = "1"; // Para controles numéricos
+        public int TextAreaRows { get; set; } = 3;     // Para textareas
+    }
+}

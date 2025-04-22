@@ -1,408 +1,271 @@
 ﻿@page "/parametros"
 @using PruebaBlazor.Models.CLI.CliClient
 @using PruebaBlazor.Models.CLI.CliClientParamVigencias
-@using PruebaBlazor.Utils.Paginacion
-@using System.Net.Http.Headers
-@inject HttpClient Http
+@using PruebaBlazor.Components
+@using PruebaBlazor.Services
+@inject ICrudService<CliClientesParamVigenciasDAO, CliClientesParamVigenciasPK, CliClientesParamVigenciasSaveDAO> _parametrosService
+@inject ICrudService<CliClienteDAO, CliClientesPK, CliClienteSaveDAO> _clientesService
 @inject IJSRuntime JSRuntime
 
-<h3 class="text-center">Parámetros de Clientes</h3>
-<div class="d-flex justify-content-end align-items-center mb-3">
+<PageToolbar 
+    Title="Parámetros de Clientes"
+    ShowAddButton="true"
+    ShowSearch="true"
+    SearchPlaceholder="Buscar parámetro..."
+    OnAddClick="AgregarNuevoRegistro"
+    OnSearch="BuscarParametros" />
 
-    <button class="btn btn-primary" @onclick="AgregarNuevoRegistro">
-        <i class="bi bi-plus-circle-fill"></i>
-    </button>
-    <input type="text"
-           class="form-control ms-2"
-           style="width: 200px;"
-           placeholder="Buscar"
-           @bind="filtroTexto"
-           @onkeyup="HandleKeyDown" />
-</div>
-
-
-@if (parametros == null)
+@if (isLoading)
 {
-    <p>Cargando...</p>
+    <div class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+    </div>
 }
 else
 {
-    <table class="table table-striped table-hover">
-        <thead class="table-dark">
-            <tr>
-                <th>
-                    <button class="btn btn-danger ms-2" @onclick="EliminarSeleccionados" disabled="@(seleccionados.Count == 0)">
-                        <i class="bi bi-trash"></i> 
-                    </button>
-                 </th>
-                <th>Acciones</th>
-                <th>ID</th>
-                <th>Nombres Cliente</th>
-                <th>Valor</th>
-                <th>Desde</th>
-                <th>Hasta</th>
-                <th>Observación</th>
-                <th>Estado</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in parametros)
-            {
-                <tr>
-
-                    @if (editando.Contains((int)item.Id.Codigo))
-                    {
-                        <!-- Fila de acción para la edición -->
-                        <td>
-                            <button class="btn btn-success btn-sm me-1" @onclick="() => ConfirmarRegistro(item)"><i class="bi bi-check-lg"></i></button>
-                            <button class="btn btn-danger btn-sm" @onclick="() => CancelarRegistro(item)"><i class="bi bi-x"></i></button>
-                        </td>
-                        <!-- Campos editables -->
-                        <td><input disabled="true" class="form-control" @bind="item.Id.Codigo" /></td>
-                        <td>
-                            <select disabled="true" class="form-control" @bind="item.Cliente.Id.Codigo">
-                                <option value="" disabled selected>Seleccionar cliente</option>
-                                @foreach (var cliente in clientes)
-                                {
-                                    <option value="@cliente.Id.Codigo" selected="@(cliente.Id.Codigo == item.Cliente.Id.Codigo ? "selected" : "")">@cliente.Nombres</option>
-                                }
-                            </select>
-                        </td>
-                        <td><input class="form-control" @bind="item.ValorParametro" /></td>
-                        <td><input class="form-control" type="date" @bind="item.FechaDesde" /></td>
-                        <td><input class="form-control" type="date" @bind="item.FechaHasta" /></td>
-                        <td><input class="form-control" @bind="item.Observacion" /></td>
-                        <td>
-                            <input type="checkbox"
-                                   class="form-check-input"
-                                   checked="@((item.Estado == "A") ? true : false)"
-                                   @onchange="() => AlternarEstado(item)" />
-                        </td>
-
-
-                    }
-                    else if (item.Id.Codigo == 0)
-                    {
-                        <!-- Fila de acción para la nueva fila -->
-                        <td>
-                            <button class="btn btn-success btn-sm me-1" @onclick="() => ConfirmarRegistro(item)"><i class="bi bi-check-lg"></i></button>
-                            <button class="btn btn-danger btn-sm" @onclick="() => CancelarRegistro(item)"><i class="bi bi-x"></i></button>
-                        </td>
-                        <!-- Inputs para la nueva fila -->
-                        <td><input class="form-control" @bind="item.Id.Codigo" /></td>
-                        <td>
-                            <select class="form-control" @onchange="(e) => ClienteSeleccionadoNuevo(item, e)">
-                                <option value="" disabled selected>Seleccionar cliente</option>
-                                @foreach (var cliente in clientes)
-                                {
-                                    <option value="@cliente.Id.Codigo">@cliente.Nombres</option>
-                                }
-                            </select>
-
-                        </td>
-                        <td><input class="form-control" @bind="item.ValorParametro" /></td>
-                        <td><input class="form-control" type="date" @bind="item.FechaDesde" /></td>
-                        <td><input class="form-control" type="date" @bind="item.FechaHasta" /></td>
-                        <td><input class="form-control" @bind="item.Observacion" /></td>
-                        <td>
-                            <input type="checkbox"
-                                   class="form-check-input"
-                                   checked="@((item.Estado == "A") ? true : false)"
-                                   @onchange="() => AlternarEstado(item)" />
-                        </td>
-
-
-
-                    }
-                    else
-                    {
-                        <td>
-                            <input type="checkbox"
-                                   class="form-check-input"
-                                   checked="@seleccionados.Contains(item.Id)"
-                                   @onchange="(e) => SeleccionarRegistro(item.Id, e.Value)" />
-                        </td>
-
-                        <!-- Fila con los botones de editar y eliminar para registros existentes -->
-                        <td>
-                            <button class="btn btn-warning btn-sm me-1" @onclick="() => EditarRegistro(item)"><i class="bi bi-pen"></i></button>
-                            <button class="btn btn-danger btn-sm" @onclick="() => EliminarRegistro(item)"><i class="bi bi-trash"></i></button>
-                        </td>
-                        <!-- Mostrar los datos existentes -->
-                        <td>@item.Id.Codigo</td>
-                        <td>@item.Cliente?.Nombres</td>
-                        <td>@item.ValorParametro</td>
-                        <td>@item.FechaDesde.ToShortDateString()</td>
-                        <td>@item.FechaHasta.ToShortDateString()</td>
-                        <td>@item.Observacion</td>
-                        <td>
-                            <input type="checkbox"
-                                   class="form-check-input"
-                                   checked="@((item.Estado == "A") ? true : false)"
-                                   @onchange="() => AlternarEstado(item)" />
-                        </td>
-
-
-                    }
-                </tr>
-            }
-        </tbody>
-    </table>
+    <TablaCRUD 
+        TItem="CliClientesParamVigenciasDAO"
+        TKey="CliClientesParamVigenciasPK"
+        Items="parametros"
+        KeySelector="item => item.Id"
+        IsNewItemFunc="item => item.Id.Codigo == 0"
+        IsLoading="isLoading"
+        OnEdit="EditarRegistro"
+        OnSave="ConfirmarRegistro"
+        OnDelete="EliminarRegistro"
+        OnBulkDelete="EliminarSeleccionados"
+        OnCancelEdit="CancelarRegistro"
+        Columns="columnas" />
 }
 
-
 @code {
-    private HashSet<CliClientesParamVigenciasPK> seleccionados = new();
-    private List<CliClientesParamVigenciasDAO>? parametros;
-    private List<CliClienteDAO> clientes = new();  // Clientes traídos desde API
-
-    private HashSet<long> editando = new HashSet<long>();
+    private List<CliClientesParamVigenciasDAO> parametros;
+    private List<CliClienteDAO> clientes = new();
+    private bool isLoading = true;
+    private string filtroTexto = string.Empty;
+    private List<TablaCRUD<CliClientesParamVigenciasDAO, CliClientesParamVigenciasPK>.TableColumn<CliClientesParamVigenciasDAO>> columnas;
 
     protected override async Task OnInitializedAsync()
     {
-        var token = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "jwt_token");
-        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        await CargarDatos();
+        ConfigurarColumnas();
+    }
 
+    private async Task CargarDatos()
+    {
+        isLoading = true;
         try
         {
-            // Cargar parámetros
-            var response = await Http.GetAsync("CliClientParamVigencia/1");
-            if (response.IsSuccessStatusCode)
-            {
-                var pageResult = await response.Content.ReadFromJsonAsync<Page<CliClientesParamVigenciasDAO>>();
-                parametros = pageResult?.Content ?? new List<CliClientesParamVigenciasDAO>();
-            }
-
-            // Cargar clientes
-            var responseClientes = await Http.GetAsync("CliClientes/1"); // Ajusta al endpoint real
-            if (responseClientes.IsSuccessStatusCode)
-            {
-                var clientesResult = await responseClientes.Content.ReadFromJsonAsync<Page<CliClienteDAO>>();
-                clientes = clientesResult?.Content ?? new List<CliClienteDAO>();
-            }
+            parametros = await _parametrosService.GetAllAsync();
+            clientes = await _clientesService.GetAllAsync();
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error cargando datos: {ex.Message}");
         }
-    }
-
-    private string filtroTexto = string.Empty;
-
-    private async Task HandleKeyDown(KeyboardEventArgs e)
-    {
-        if (e.Key == "Enter")
+        finally
         {
-            await BuscarParametros();
+            isLoading = false;
         }
     }
 
-
-
-    private async Task BuscarParametros()
+    private void ConfigurarColumnas()
     {
-        if (string.IsNullOrWhiteSpace(filtroTexto))
+        columnas = new List<TablaCRUD<CliClientesParamVigenciasDAO, CliClientesParamVigenciasPK>.TableColumn<CliClientesParamVigenciasDAO>>
         {
-            await OnInitializedAsync(); // Recarga la lista completa si está vacío
+            new() {
+                Title = "ID",
+                GetValue = item => item.Id.Codigo,
+                SetValue = (item, value) => {
+                    if (long.TryParse(value?.ToString(), out long codigo))
+                        item.Id.Codigo = codigo;
+                },
+                EditorType = TablaCRUD<CliClientesParamVigenciasDAO, CliClientesParamVigenciasPK>.EditorType.Number
+            },
+            new() {
+                Title = "Cliente",
+                GetValue = item => item.Cliente?.Nombres ?? "",
+                // Aquí podemos usar un selector personalizado o un simple campo de texto
+                // dependiendo de los requerimientos
+                EditTemplate = item => item.Id.Codigo == 0 ? 
+                    @<EntitySelector 
+                        TItem="CliClienteDAO"
+                        TValue="long"
+                        Items="clientes"
+                        Value="@item.Cliente?.Id.Codigo"
+                        ValueSelector="c => c.Id.Codigo"
+                        DisplaySelector="c => c.Nombres"
+                        ValueChanged="newValue => ClienteSeleccionado(item, newValue)" /> :
+                    @<input type="text" class="form-control" value="@item.Cliente?.Nombres" disabled />
+            },
+            new() {
+                Title = "Valor",
+                GetValue = item => item.ValorParametro,
+                SetValue = (item, value) => item.ValorParametro = value?.ToString(),
+                EditorType = TablaCRUD<CliClientesParamVigenciasDAO, CliClientesParamVigenciasPK>.EditorType.Text
+            },
+            new() {
+                Title = "Desde",
+                GetValue = item => item.FechaDesde.ToShortDateString(),
+                SetValue = (item, value) => {
+                    if (DateTime.TryParse(value?.ToString(), out DateTime fecha))
+                        item.FechaDesde = fecha;
+                },
+                EditorType = TablaCRUD<CliClientesParamVigenciasDAO, CliClientesParamVigenciasPK>.EditorType.Date
+            },
+            new() {
+                Title = "Hasta",
+                GetValue = item => item.FechaHasta.ToShortDateString(),
+                SetValue = (item, value) => {
+                    if (DateTime.TryParse(value?.ToString(), out DateTime fecha))
+                        item.FechaHasta = fecha;
+                },
+                EditorType = TablaCRUD<CliClientesParamVigenciasDAO, CliClientesParamVigenciasPK>.EditorType.Date
+            },
+            new() {
+                Title = "Observación",
+                GetValue = item => item.Observacion,
+                SetValue = (item, value) => item.Observacion = value?.ToString(),
+                EditorType = TablaCRUD<CliClientesParamVigenciasDAO, CliClientesParamVigenciasPK>.EditorType.TextArea,
+                TextAreaRows = 2
+            },
+            new() {
+                Title = "Estado",
+                GetValue = item => item.Estado == "A" ? "Activo" : "Inactivo",
+                SetValue = (item, value) => {
+                    if (value is bool isActive)
+                        item.Estado = isActive ? "A" : "I";
+                },
+                EditorType = TablaCRUD<CliClientesParamVigenciasDAO, CliClientesParamVigenciasPK>.EditorType.CheckBox
+            }
+        };
+    }
+
+    private void ClienteSeleccionado(CliClientesParamVigenciasDAO item, long codigoCliente)
+    {
+        var cliente = clientes.FirstOrDefault(c => c.Id.Codigo == codigoCliente);
+        if (cliente != null)
+        {
+            item.Cliente = cliente;
+            item.Id.CliClientCodigo = (int)cliente.Id.Codigo;
+            item.Id.CliClientAgeLicencCodigo = cliente.Id.AgeLicencCodigo;
+            item.Id.CLIParGeCodigo = 1;
+        }
+    }
+
+    private void AgregarNuevoRegistro()
+    {
+        var nuevo = new CliClientesParamVigenciasDAO
+        {
+            Estado = "A",
+            Observacion = "",
+            FechaDesde = DateTime.Today,
+            FechaHasta = DateTime.Today.AddMonths(1),
+            ValorParametro = "",
+            Id = new CliClientesParamVigenciasPK
+            {
+                CliClientCodigo = 0,
+                CliClientAgeLicencCodigo = 0,
+                CLIParGeCodigo = 0,
+                Codigo = 0
+            },
+            Cliente = new CliClienteDAO
+            {
+                Id = new CliClientesPK { Codigo = 0, AgeLicencCodigo = 0 },
+                Nombres = ""
+            }
+        };
+
+        parametros.Insert(0, nuevo);
+    }
+
+    private void EditarRegistro(CliClientesParamVigenciasDAO item)
+    {
+        // La lógica de edición es manejada por el componente
+    }
+
+    private async Task ConfirmarRegistro(CliClientesParamVigenciasDAO item)
+    {
+        try {
+            var saveModel = new CliClientesParamVigenciasSaveDAO
+            {
+                Id = item.Id,
+                Observacion = item.Observacion,
+                FechaDesde = item.FechaDesde,
+                FechaHasta = item.FechaHasta,
+                Estado = item.Estado,
+                ValorParametro = item.ValorParametro,
+                UsuarioIngreso = item.Id.Codigo == 0 ? 1 : 0,
+                UsuarioModificacion = item.Id.Codigo == 0 ? 0 : 1,
+            };
+
+            if (item.Id.Codigo == 0)
+                await _parametrosService.CreateAsync(saveModel);
+            else
+                await _parametrosService.UpdateAsync(saveModel);
+                
+            await CargarDatos(); // Recargar datos después de guardar
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Error guardando: {ex.Message}");
+            // Manejar el error
+        }
+    }
+
+    private async Task EliminarRegistro(CliClientesParamVigenciasDAO item)
+    {
+        item.Estado = "N";
+        await ConfirmarRegistro(item);
+    }
+
+    private async Task EliminarSeleccionados(List<CliClientesParamVigenciasDAO> items)
+    {
+        var registrosSave = items.Select(item => new CliClientesParamVigenciasSaveDAO
+        {
+            Id = item.Id,
+            Estado = "N",
+            UsuarioModificacion = 1,
+            // Copiar otros campos necesarios
+        }).ToList();
+
+        try {
+            await _parametrosService.BulkDeleteAsync(registrosSave);
+            await CargarDatos(); // Recargar datos después de eliminar
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Error eliminando registros: {ex.Message}");
+            // Manejar el error
+        }
+    }
+
+    private void CancelarRegistro(CliClientesParamVigenciasDAO item)
+    {
+        if (item.Id.Codigo == 0)
+            parametros.Remove(item); // Eliminar el item nuevo sin guardar
+    }
+
+    private async Task BuscarParametros(string filtro)
+    {
+        if (string.IsNullOrWhiteSpace(filtro))
+        {
+            await CargarDatos(); // Recargar todos los datos
             return;
         }
 
+        isLoading = true;
         try
         {
-            var token = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "jwt_token");
-            Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-            var response = await Http.GetAsync($"CliClientParamVigencia/filtro/1?filtro={Uri.EscapeDataString(filtroTexto)}");
-            if (response.IsSuccessStatusCode)
-            {
-                var result = await response.Content.ReadFromJsonAsync<Page<CliClientesParamVigenciasDAO>>();
-                parametros = result?.Content ?? new List<CliClientesParamVigenciasDAO>();
-            }
+            parametros = await _parametrosService.SearchAsync(filtro);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error buscando: {ex.Message}");
         }
-    }
-
-    private void SeleccionarRegistro(CliClientesParamVigenciasPK id, object? valor)
-    {
-        if (valor is bool isChecked)
+        finally
         {
-            if (isChecked)
-                seleccionados.Add(id);
-            else
-                seleccionados.Remove(id);
+            isLoading = false;
         }
-    }
-
-
-
-    private async Task EliminarSeleccionados()
-    {
-        if (seleccionados.Any())
-        {
-            // Primero, modificar el estado de los registros seleccionados
-            var registrosAEliminar = parametros.Where(param => seleccionados.Contains(param.Id)).ToList();
-
-            // Crear una lista de objetos tipo save para enviar al backend
-            var registrosSave = registrosAEliminar.Select(registro => new CliClientesParamVigenciasSaveDAO
-                {
-                    Id = registro.Id,
-                    Estado = "N",  // Cambiar el estado a "N"
-                    UsuarioModificacion = 1,  // Establecer UsuarioModificacion a 1
-                }).ToList();
-
-            try
-            {
-                var token = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "jwt_token");
-                Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-                // Enviar los registros modificados al servidor para eliminar en lote
-                var response = await Http.PutAsJsonAsync("https://localhost:5106/CliClientParamVigencia/varios", registrosSave);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    // Si la eliminación fue exitosa, actualizamos la lista de parámetros
-                    parametros.RemoveAll(param => seleccionados.Contains(param.Id));
-                    seleccionados.Clear(); // Limpiar la lista de seleccionados
-                    StateHasChanged(); // Actualizar la vista
-                }
-                else
-                {
-                    Console.WriteLine($"Error al eliminar los registros: {response.StatusCode}");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error al eliminar los registros: {ex.Message}");
-            }
-        }
-    }
-
-
-
-
-    private void AgregarNuevoRegistro()
-    {
-        var nuevo = new CliClientesParamVigenciasDAO
-            {
-                Estado = "A",
-                Observacion = "",
-                FechaDesde = DateTime.Today,
-                FechaHasta = DateTime.Today.AddMonths(1),
-                ValorParametro = "",
-                Id = new CliClientesParamVigenciasPK
-                {
-                    CliClientCodigo = 0,
-                    CliClientAgeLicencCodigo = clientes.FirstOrDefault()?.Id?.AgeLicencCodigo ?? 0,
-                    CLIParGeCodigo = 0,
-                    Codigo = 0
-                },
-                Cliente = new CliClienteDAO
-                {
-                    Id = new CliClientesPK
-                    {
-                        Codigo = clientes.FirstOrDefault()?.Id?.Codigo ?? 0,
-                        AgeLicencCodigo = clientes.FirstOrDefault()?.Id?.AgeLicencCodigo ?? 0
-                    },
-                    Nombres = clientes.FirstOrDefault()?.Nombres ?? ""
-                }
-            };
-
-        parametros.Insert(0, nuevo);
-    }
-
-
-    private void EditarRegistro(CliClientesParamVigenciasDAO registro)
-    {
-        editando.Add(registro.Id.Codigo);
-    }
-
-    private void CancelarRegistro(CliClientesParamVigenciasDAO registro)
-    {
-        if (registro.Id.Codigo == 0)
-        {
-            parametros.Remove(registro); // Era nuevo
-        }
-        editando.Remove(registro.Id.Codigo);
-    }
-
-    private void ClienteSeleccionadoNuevo(CliClientesParamVigenciasDAO item, ChangeEventArgs e)
-    {
-        if (int.TryParse(e.Value?.ToString(), out int codigoCliente))
-        {
-            var cliente = clientes.FirstOrDefault(c => c.Id.Codigo == codigoCliente);
-            if (cliente != null)
-            {
-                item.Cliente = cliente;
-
-                // Actualizar la PK del registro con datos del cliente seleccionado
-                item.Id.CliClientCodigo = (int)cliente.Id.Codigo;  // Asignar código del cliente
-                item.Id.CliClientAgeLicencCodigo = cliente.Id.AgeLicencCodigo;  // Asignar AgeLicencCodigo del cliente
-
-                // Establecer el valor de CLIParGeCodigo, puedes dejarlo en 0 si no tiene un valor específico.
-                item.Id.CLIParGeCodigo = 1; // O cualquier valor si lo necesitas.
-            }
-        }
-    }
-
-    private async void ConfirmarRegistro(CliClientesParamVigenciasDAO registro)
-    {
-        var saveModel = new CliClientesParamVigenciasSaveDAO
-            {
-                Id = registro.Id,
-                Observacion = registro.Observacion,
-                FechaDesde = registro.FechaDesde,
-                FechaHasta = registro.FechaHasta,
-                Estado = registro.Estado,
-                ValorParametro = registro.ValorParametro,
-                UsuarioIngreso = registro.Id.Codigo == 0 ? 1 : 0,
-                UsuarioModificacion = registro.Id.Codigo == 0 ? 0 : 1,
-            };
-
-        try
-        {
-            HttpResponseMessage response;
-            if (registro.Id.Codigo == 0)
-            {
-                response = await Http.PostAsJsonAsync("CliClientParamVigencia", saveModel);
-            }
-            else
-            {
-                response = await Http.PutAsJsonAsync($"CliClientParamVigencia", saveModel);
-            }
-
-            var content = await response.Content.ReadAsStringAsync();
-            Console.WriteLine("Response content: " + content); // Imprime la respuesta como texto para depuración
-
-            if (response.IsSuccessStatusCode)
-            {
-                await OnInitializedAsync();
-                editando.Remove(registro.Id.Codigo);
-                StateHasChanged();
-            }
-            else
-            {
-                Console.WriteLine($"Error al guardar: {response.StatusCode}");
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error guardando registro: {ex.Message}");
-        }
-    }
-
-
-    private async void EliminarRegistro(CliClientesParamVigenciasDAO registro)
-    {
-        registro.Estado = "N";
-        ConfirmarRegistro(registro);
-    }
-
-    private void AlternarEstado(CliClientesParamVigenciasDAO item)
-    {
-        item.Estado = item.Estado == "A" ? "I" : "A";
-        ConfirmarRegistro(item);
     }
 }
