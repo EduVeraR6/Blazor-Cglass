@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
+using PruebaBlazor.Models;
 using PruebaBlazor.Models.CLI.CliClient;
 using PruebaBlazor.Models.CLI.CliClientParamVigencias;
 using PruebaBlazor.Services;
@@ -12,6 +13,10 @@ namespace PruebaBlazor.Pages
 {
     public partial class ClientParamVigencia : ComponentBase
     {
+        private OperacionEstado estadoActual = OperacionEstado.Ninguna;
+
+
+
         private HashSet<CliClientesParamVigenciasPK> seleccionados = new();
         private List<CliClientesParamVigenciasDAO>? parametros;
         private List<CliClienteDAO> clientes = new();  
@@ -64,8 +69,6 @@ namespace PruebaBlazor.Pages
             }
         }
 
-
-
         private async Task BuscarParametros()
         {
             if (string.IsNullOrWhiteSpace(filtroTexto))
@@ -105,6 +108,12 @@ namespace PruebaBlazor.Pages
 
         private async Task EliminarSeleccionados()
         {
+            if (estadoActual != OperacionEstado.Ninguna)
+            {
+                ToastService.ShowWarning("Complete la operación actual antes de eliminar registros", 5);
+                return;
+            }
+
             if (seleccionados.Any())
             {
                 var registrosAEliminar = parametros.Where(param => seleccionados.Contains(param.Id)).ToList();
@@ -151,6 +160,21 @@ namespace PruebaBlazor.Pages
 
         private void AgregarNuevoRegistro()
         {
+            if (estadoActual != OperacionEstado.Ninguna)
+            {
+                ToastService.ShowWarning("Complete la operación actual antes de crear un nuevo registro", 5);
+                return;
+            }
+
+            if (parametros.Any(p => p.Id.Codigo == 0))
+            {
+                ToastService.ShowWarning("Ya existe un registro en creación. Complete o cancele ese primero.", 5);
+                return;
+            }
+
+            estadoActual = OperacionEstado.Creando;
+
+
             var nuevo = new CliClientesParamVigenciasDAO
             {
                 Estado = "A",
@@ -182,6 +206,13 @@ namespace PruebaBlazor.Pages
 
         private void EditarRegistro(CliClientesParamVigenciasDAO registro)
         {
+            if (estadoActual != OperacionEstado.Ninguna)
+            {
+                ToastService.ShowWarning("Complete la operación actual antes de editar un registro", 5);
+                return;
+            }
+
+            estadoActual = OperacionEstado.Editando;
             editando.Add(registro.Id.Codigo);
         }
 
@@ -189,9 +220,14 @@ namespace PruebaBlazor.Pages
         {
             if (registro.Id.Codigo == 0)
             {
-                parametros.Remove(registro); 
+                parametros.Remove(registro);
+                estadoActual = OperacionEstado.Ninguna;
             }
-            editando.Remove(registro.Id.Codigo);
+            else
+            {
+                editando.Remove(registro.Id.Codigo);
+                estadoActual = OperacionEstado.Ninguna;
+            }
         }
 
         private void ClienteSeleccionadoNuevo(CliClientesParamVigenciasDAO item, ChangeEventArgs e)
@@ -228,27 +264,38 @@ namespace PruebaBlazor.Pages
             try
             {
                 HttpResponseMessage response;
-                if (registro.Id.Codigo == 0)
-                {
-                    response = await Http.PostAsJsonAsync("CliClientParamVigencia", saveModel);
-                }
-                else
-                {
-                    response = await Http.PutAsJsonAsync($"CliClientParamVigencia", saveModel);
-                }
+                bool esNuevoRegistro = registro.Id.Codigo == 0;
+
+                response = esNuevoRegistro
+                    ? await Http.PostAsJsonAsync("CliClientParamVigencia", saveModel)
+                    : await Http.PutAsJsonAsync("CliClientParamVigencia", saveModel);
 
                 var content = await response.Content.ReadAsStringAsync();
-
+              
                 if (response.IsSuccessStatusCode)
                 {
                     await OnInitializedAsync();
                     editando.Remove(registro.Id.Codigo);
-                    StateHasChanged();
+                    estadoActual = OperacionEstado.Ninguna;
+
+
+                    if (esNuevoRegistro)
+                    {
+                        ToastService.ShowSuccess("Registro creado con éxito", 5);
+                    }
+                    else
+                    {
+                        ToastService.ShowSuccess($"{content}", 5);
+                    }
                 }
                 else
                 {
-                    Console.WriteLine($"Error al guardar: {response.StatusCode}");
+                    string tipoOperacion = esNuevoRegistro ? "Registrar" : "Actualizar";
+                    Console.WriteLine($"Error al {tipoOperacion}: {response.StatusCode}");
+                    ToastService.ShowError($"Error al {tipoOperacion}: {content}", 5);
                 }
+
+
             }
             catch (Exception ex)
             {
@@ -259,8 +306,15 @@ namespace PruebaBlazor.Pages
 
         private async void EliminarRegistro(CliClientesParamVigenciasDAO registro)
         {
-             registro.Estado = "N";
 
+
+            if (estadoActual != OperacionEstado.Ninguna)
+            {
+                ToastService.ShowWarning("Complete la operación actual antes de eliminar un registro", 5);
+                return;
+            }
+
+            registro.Estado = "N";
             await ConfirmarRegistro(registro);
             StateHasChanged();
         }
@@ -271,5 +325,6 @@ namespace PruebaBlazor.Pages
             item.Estado = item.Estado == "A" ? "I" : "A";
             await ConfirmarRegistro(item);
         }
+
     }
 }
