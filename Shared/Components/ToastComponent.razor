@@ -1,0 +1,19 @@
+﻿@using Microsoft.AspNetCore.Components
+@using System.Threading.Tasks
+@using PruebaBlazor.Services
+@inject ToastService ToastService
+
+@if (ShowMessage)
+{
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+        <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header @GetHeaderClass()">
+                <strong class="me-auto text-white">@MessageTitle</strong>
+                <button type="button" class="btn-close btn-close-white" aria-label="Close" @onclick="HideMessage"></button>
+            </div>
+            <div class="toast-body @MessageTypeClass">
+                @MessageContent
+            </div>
+        </div>
+    </div>
+}

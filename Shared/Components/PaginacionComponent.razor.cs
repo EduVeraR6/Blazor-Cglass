@@ -9,6 +9,9 @@ namespace PruebaBlazor.Shared.Components
         public Page<TModel> Page { get; set; }
 
         [Parameter]
+        public bool Deshabilitado { get; set; } = false;
+
+        [Parameter]
         public EventCallback<int> OnPaginaCambiada { get; set; }
 
         [Parameter]
