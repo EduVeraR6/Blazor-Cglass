@@ -14,8 +14,8 @@ namespace PruebaBlazor.Pages
     public partial class ClientParamVigencia : ComponentBase
     {
         private OperacionEstado estadoActual = OperacionEstado.Ninguna;
-
-
+        private bool mostrarBuscador = false;
+        private string filtroTexto = string.Empty;
 
         private HashSet<CliClientesParamVigenciasPK> seleccionados = new();
         private List<CliClientesParamVigenciasDAO>? parametros;
@@ -59,19 +59,12 @@ namespace PruebaBlazor.Pages
         }
 
 
-        private string filtroTexto = string.Empty;
 
-        private async Task HandleKeyDown(KeyboardEventArgs e)
+        private async Task BuscarParametros(string searchValue)
         {
-            if (e.Key == "Enter")
-            {
-                await BuscarParametros();
-            }
-        }
-
-        private async Task BuscarParametros()
-        {
-            if (string.IsNullOrWhiteSpace(filtroTexto))
+            filtroTexto = searchValue;
+            
+            if (string.IsNullOrWhiteSpace(searchValue))
             {
                 await OnInitializedAsync();
                 return;
@@ -80,11 +73,12 @@ namespace PruebaBlazor.Pages
             try
             {
                 cliClienteParamVigencia = await PaginacionService.CargarPagina<CliClientesParamVigenciasDAO>(
-                    $"CliClientParamVigencia/filtro/1?filtro={Uri.EscapeDataString(filtroTexto)}&",
+                    $"CliClientParamVigencia/filtro/1?filtro={Uri.EscapeDataString(searchValue)}&",
                     paginaActual,
                     tamanioPagina);
 
                 parametros = cliClienteParamVigencia?.Content ?? new List<CliClientesParamVigenciasDAO>();
+                StateHasChanged();
             }
             catch (Exception ex)
             {

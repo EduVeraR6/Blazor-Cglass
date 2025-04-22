@@ -13,17 +13,24 @@
 
 
 <h3 class="text-center">Parámetros de Clientes</h3>
-<div class="d-flex justify-content-end align-items-center mb-3">
+<div class="d-flex justify-content-end gap-3 align-items-center mb-3">
 
     <button class="btn btn-primary" @onclick="AgregarNuevoRegistro" disabled="@(estadoActual != OperacionEstado.Ninguna)">
         <i class="bi bi-plus-circle-fill"></i>
     </button>
-    <input type="text"
-           class="form-control ms-2"
-           style="width: 200px;"
-           placeholder="Buscar"
-           @bind="filtroTexto"
-           @onkeyup="HandleKeyDown" />
+
+    <button class="btn btn-outline-secondary me-2" @onclick="() => mostrarBuscador = !mostrarBuscador">
+        <i class="bi bi-search"></i>
+    </button>
+
+
+    @if (mostrarBuscador)
+    {
+       <SearchComponent InputType="text"
+               SearchValue="@filtroTexto"
+               OnSearch="BuscarParametros" />
+    }
+
 </div>
 
 
