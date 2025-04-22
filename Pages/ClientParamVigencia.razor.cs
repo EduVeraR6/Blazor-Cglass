@@ -112,8 +112,8 @@ namespace PruebaBlazor.Pages
                 var registrosSave = registrosAEliminar.Select(registro => new CliClientesParamVigenciasSaveDAO
                 {
                     Id = registro.Id,
-                    Estado = "N",  
-                    UsuarioModificacion = 1,  
+                    Estado = "N",
+                    UsuarioModificacion = 1,
                 }).ToList();
 
                 try
@@ -126,8 +126,14 @@ namespace PruebaBlazor.Pages
                     if (response.IsSuccessStatusCode)
                     {
                         parametros.RemoveAll(param => seleccionados.Contains(param.Id));
-                        seleccionados.Clear(); 
-                        StateHasChanged(); 
+                        seleccionados.Clear();
+                        StateHasChanged();
+
+                        if (parametros.Count == 0 && paginaActual > 0)
+                        {
+                            paginaActual--;
+                            await CargarDatos();
+                        }
                     }
                     else
                     {
@@ -140,7 +146,6 @@ namespace PruebaBlazor.Pages
                 }
             }
         }
-
 
 
 
@@ -206,7 +211,7 @@ namespace PruebaBlazor.Pages
             }
         }
 
-        private async void ConfirmarRegistro(CliClientesParamVigenciasDAO registro)
+        private async Task ConfirmarRegistro(CliClientesParamVigenciasDAO registro)
         {
             var saveModel = new CliClientesParamVigenciasSaveDAO
             {
@@ -254,14 +259,17 @@ namespace PruebaBlazor.Pages
 
         private async void EliminarRegistro(CliClientesParamVigenciasDAO registro)
         {
-            registro.Estado = "N";
-            ConfirmarRegistro(registro);
+             registro.Estado = "N";
+
+            await ConfirmarRegistro(registro);
+            StateHasChanged();
         }
 
-        private void AlternarEstado(CliClientesParamVigenciasDAO item)
+
+        private async void AlternarEstado(CliClientesParamVigenciasDAO item)
         {
             item.Estado = item.Estado == "A" ? "I" : "A";
-            ConfirmarRegistro(item);
+            await ConfirmarRegistro(item);
         }
     }
 }

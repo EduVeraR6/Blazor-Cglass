@@ -1,0 +1,53 @@
+## User-specific files
+.idea/
+.vscode/
+
+## Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+
+## Windows Installer files
+*.vspscc
+
+## Windows Installer directories
+.vs2019/
+.vs2017/
+
+## ASP.NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## .NET Core
+.vscode/
+.vs/
+bin/
+obj/
+.DS_Store
+*.user
+*.userosscache
+*.suo
+*.userprefs
+
+## ASP.NET specific
+wwwroot/lib/
+wwwroot/css/
+wwwroot/js/
+node_modules/
+
+## npm
+node_modules/
+package-lock.json
+yarn.lock
+
+## Logs
+*.log
+
+## Webpack & Babel
+dist/
+*.map
+
+## Blazor WebAssembly
+wwwroot/_content/
