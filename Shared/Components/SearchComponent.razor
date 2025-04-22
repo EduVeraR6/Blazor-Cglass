@@ -1,0 +1,25 @@
+﻿@using Microsoft.AspNetCore.Components.Web
+
+<div class="d-flex align-items-center">
+    @if (InputType == "text")
+    {
+        <input class="form-control"
+               style="width: 200px;"
+               placeholder="Buscar"
+               @bind="SearchValue"
+               @onkeyup="HandleKeyUp" />
+
+    }
+    else if (InputType == "select" && Options != null)
+    {
+        <select class="form-select"
+                style="width: 200px;"
+                @onchange="HandleSelectChange">
+            <option value="">-- Seleccionar --</option>
+            @foreach (var option in Options)
+            {
+                <option value="@option.Value">@option.Label</option>
+            }
+        </select>
+    }
+</div>
